@@ -1,6 +1,7 @@
 from structures import Text, Tag
 import argparse
 import logging
+import pickle
 import sys
 
 logging.basicConfig(format='%(asctime):%(levelname):%(message)', filename='training.log', level=logging.DEBUG)
@@ -13,25 +14,25 @@ parser.add_argument('-l', '--language', default='english')
 parser.add_argument('-t', '--tagname')
 
 def main(files, tagname, language, output):
-    tag = Tag(tagname, set())
+    tag = Tag(tagname)
 
     for file in files:
-        with open(file, 'r') as fd:
+        with open(file, 'r', errors='ignore') as fd:
             analyzing = Text(fd.read(), language)
 
         analyzing.preprocessing()
-        tag.union(analyzing.getWords())
+        tag.addWords(analyzing.getWords())
 
     print(tag)
-    with open(output, 'w') as of:
+    with open(output, 'bw') as of:
         pickle.dump(tag, of)
 
 if __name__ == "__main__":
-    parser.parse_args(sys.arg[1:])
+    args = parser.parse_args(sys.argv[1:])
 
-    file_list = parser.files
-    output_file = parser.output
-    language = parser.language
-    tagname = parser.tagname
+    file_list = args.files
+    output_file = args.output
+    language = args.language
+    tagname = args.tagname
 
-    main(file_list, tagname, language, output)
+    main(file_list, tagname, language, output_file)

@@ -1,3 +1,4 @@
+import string
 import re
 import nltk
 
@@ -42,7 +43,7 @@ class Text:
         Removes punctuation from given instance text.
         Doesn't remove dots and single quotes, safe to use with tokenization and number removal.
         '''
-        self.text = self.text.translate(str.maketrans('', '', string.tokenizationAwarePunctuation))
+        self.text = self.text.translate(str.maketrans('', '', self.tokenizationAwarePunctuation))
 
     def setNumberPreservation(self, preserve: bool):
         '''
@@ -87,7 +88,7 @@ class Text:
         Requires tokenized text.
         '''
         if self.__tokenized:
-            self.tokens = [st for self.__stemmer.stem(st) in self.tokens]
+            self.tokens = [self.__stemmer.stem(st) for st in self.tokens]
             self.__stemmed = True
         else:
             raise ValueError("Can't stem non tokenized text.")
@@ -109,7 +110,7 @@ class Text:
 
         if self.__tokenized:
             lemmatizer = nltk.stem.WordNetLemmatizer()
-            self.tokens = [lt for lemmatizer.lemmatize(lt) in self.token]
+            self.tokens = [lemmatizer.lemmatize(lt) for lt in self.token]
 
     def isLemmatised(self):
         return self.__lemmatised
@@ -126,47 +127,30 @@ class Text:
         return set(self.tokens)
 
 
-class Tag(set):
+class Tag:
     '''
     Represents a set of words that features a text.
-    Used in feature extraction and model training.
+    Used to assign tags and store model data.
     '''
 
-    def __init__(self, rep_class: str, words: iterable):
+    def __init__(self, tag_name: str, tag_words: set = set()):
         '''
-        :param rep_class: String of represented class.
-        :param words: Iterable object of strings to compose the set of words.
+        Constructs a bag of words ready to be compared against a tokenized text.
+        :param comp_tag: Tag to compare against
         '''
-        super().__init__(words)
-        self.represented_class = rep_class
+        self.tag_name = tag_name
+        self.tag_words = tag_words
 
     def __str__(self):
-        return self.represented_class
+        return self.tag_name
 
-    def union(self, words: set):
+    def addWords(self, tag_words: set):
+        self.tag_words |= tag_words
+
+    def rate(self, words: set) -> float:
         '''
-        Adds words to this tag.
-        :param words: Iterable of strings representing featured words.
+        Instantly compares this tag bag of words against given tokenized text.
+        :param words: Set with tokenized text words.
+        :return: Float representing confidence of this tag on text.
         '''
-
-        super().union(words)
-
-
-class Bag:
-    '''
-    Represents a bag of words.
-    Used to compare a text against a tag.
-    '''
-
-    def __init__(self, comp_tag: Tag, words: set):
-        '''
-        Constructs a bag of words and instantly compares it against given tokenized text.
-        :param comp_tag: Tag to compare against
-        :param words: Tokenized text as set representation
-        '''
-        #super().fromkeys(comp_tag, 0)
-        self.tag = comp_tag
-        self.words = words
-
-    def getScore(self):
-        return float(len(self.tag & self.words)) / len(self.tag)
+        return float(len(self.tag_words & words)) / len(self.tag_words)
