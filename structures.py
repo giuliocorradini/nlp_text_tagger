@@ -133,12 +133,13 @@ class Tag:
     Used to assign tags and store model data.
     '''
 
-    def __init__(self, tag_name: str, tag_words: set = set()):
+    def __init__(self, tag_name: str, language: str = 'english', tag_words: set = set()):
         '''
         Constructs a bag of words ready to be compared against a tokenized text.
         :param comp_tag: Tag to compare against
         '''
         self.tag_name = tag_name
+        self.language = language
         self.tag_words = tag_words
 
     def __str__(self):
