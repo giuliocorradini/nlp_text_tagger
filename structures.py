@@ -4,6 +4,35 @@ import nltk
 
 nltk.data.path.append('./nltk_data')    # Configure corpora and models path
 
+class Tag:
+    '''
+    Represents a set of words that features a text.
+    Used to assign tags and store model data.
+    '''
+
+    def __init__(self, tag_name: str, language: str = 'english', tag_words: set = set()):
+        '''
+        Constructs a bag of words ready to be compared against a tokenized text.
+        :param comp_tag: Tag to compare against
+        '''
+        self.name = tag_name
+        self.language = language
+        self.tag_words = tag_words
+
+    def __str__(self):
+        return self.name
+
+    def addWords(self, tag_words: set):
+        self.tag_words |= tag_words
+
+    def rate(self, words: set) -> float:
+        '''
+        Instantly compares this tag bag of words against given tokenized text.
+        :param words: Set with tokenized text words.
+        :return: Float representing confidence of this tag on text.
+        '''
+        return float(len(self.tag_words & words)) / len(self.tag_words)
+
 class Text:
     '''
     Represents a NLP text that is being processed
@@ -28,6 +57,8 @@ class Text:
         self.__lang = lang
         if lang != 'english':
             self.__stemmer = nltk.stem.SnowballStemmer(lang)
+
+        self.tags = []
 
     def __str__(self):
         return self.text
@@ -126,32 +157,5 @@ class Text:
     def getWords(self):
         return set(self.tokens)
 
-
-class Tag:
-    '''
-    Represents a set of words that features a text.
-    Used to assign tags and store model data.
-    '''
-
-    def __init__(self, tag_name: str, language: str = 'english', tag_words: set = set()):
-        '''
-        Constructs a bag of words ready to be compared against a tokenized text.
-        :param comp_tag: Tag to compare against
-        '''
-        self.tag_name = tag_name
-        self.language = language
-        self.tag_words = tag_words
-
-    def __str__(self):
-        return self.tag_name
-
-    def addWords(self, tag_words: set):
-        self.tag_words |= tag_words
-
-    def rate(self, words: set) -> float:
-        '''
-        Instantly compares this tag bag of words against given tokenized text.
-        :param words: Set with tokenized text words.
-        :return: Float representing confidence of this tag on text.
-        '''
-        return float(len(self.tag_words & words)) / len(self.tag_words)
+    def addTag(self, tag: Tag):
+        self.tags.append(tag)
