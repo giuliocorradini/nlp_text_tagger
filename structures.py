@@ -43,7 +43,7 @@ class Text:
     __preserveNumberPresence = True
     __stemmer = nltk.stem.LancasterStemmer()
 
-    def __init__(self, source: str, tags: list = None, lang: str = 'english'):
+    def __init__(self, source: str, tag: list = None, lang: str = 'english'):
         self.text = source
 
         # State variables initialization
@@ -58,13 +58,16 @@ class Text:
         if lang != 'english':
             self.__stemmer = nltk.stem.SnowballStemmer(lang)
 
-        if tags == None:
-            self.tags = []
-        else:
-            self.tags = tags
+        self.tag = tag
 
     def __str__(self):
         return self.text
+
+    def __len__(self):
+        if self.__tokenized:
+            return len(self.tokens)
+        else:
+            return len(self.text)
 
     def lowerCase(self):
         '''
@@ -156,6 +159,3 @@ class Text:
         self.tokenize()
         self.removeStopWords()
         self.stem()
-
-    def addTag(self, tag: Tag):
-        self.tags.append(tag)
