@@ -7,10 +7,11 @@ import math
 from collections import Counter, defaultdict
 from operator import itemgetter
 
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', filename='training.log', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', filename='training.log', level=logging.INFO,
+                    filemode='w')
 
 class Trainer:
-    threshold = 0.08
+    threshold = 0.00055
 
     def __init__(self, language: str, corpus: list = None):
 
@@ -36,20 +37,22 @@ class Trainer:
         self.tags.append(tag)
 
     def train(self):
-        tf_memo = dict()
-        tdf_memo = Counter()
+        doclens = Counter() # Lenght sum of documents for class
+        termf = Counter()   # Term absolute frequency in documents class
+        termdocf = Counter()    # Frequency of docs that contain a term
 
         for i, doc in enumerate(self.corpus):
 
             logging.info("Analyzing document #{}.".format(i))
 
             doc.preprocessing()
+            doclens[doc.tag.name] += len(doc)
 
             logging.debug("Stopwords removed. Contains {} tokens.".format(len(doc.tokens)))
 
-            for t in set(doc.tokens):   # Documents tokens are traversed only once
-                tf_memo[(i, t)] = (doc.tags[0].name, doc.tokens.count(t) / len(doc.tokens))  # Compute tf for this document
-                tdf_memo[t] += 1    # Counts this word in global counter
+            for t in set(doc.tokens):   # Documents tokens(terms) are traversed only once
+                termf[(t, doc.tag.name)] += doc.tokens.count(t)  # Sum abs freq for this term
+                termdocf[t] += 1    # Counts this word in global counter
 
             logging.info("Finished analyzing document.")
 
@@ -58,12 +61,18 @@ class Trainer:
 
         # Compute tf-idf
         #TODO: compute stdev
-        for (doc_n, word), (tname, tf) in tf_memo.items():
-            idf = math.log(len(self.corpus) / tdf_memo[word])
+        for (word, tName), absFreq in termf.items():    # word, tag name, absolute frequency
+
+            tf = absFreq / doclens[tName]
+            idf = math.log(len(self.corpus) / termdocf[word]) # Doesn't use clustered documents, dataset can be odd
+                                                              # in documents separation (eg. cl1: 20 docs, cl2: 15 docs)
             tf_idf = tf * idf
+            logging.debug("{}. Score: {}. Tag: {}".format(word, tf_idf, tName))
+
             if tf_idf > self.threshold:  # Select only highly representative words, above threshold
-                logging.debug("From doc #{} selected {}. Score: {}".format(doc_n, word, tf_idf))
-                tagWords[tname].add(word)
+                logging.debug("Selected.")
+                tagWords[tName].add(word)
+
 
         for tag in self.tags:
 
@@ -99,7 +108,7 @@ def main(dataset_dir: str, output_dir: str, language: str):
 
         for file in os.listdir():
             with open(file, 'r', errors='ignore') as fd:
-                trainer.addText(Text(fd.read(), [tag]))
+                trainer.addText(Text(fd.read(), tag))
 
         os.chdir('..')
 

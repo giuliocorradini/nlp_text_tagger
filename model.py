@@ -36,13 +36,13 @@ def main(tags: list, files: list):
 
         model.classify(text)
 
-        print(file, [t.name for t in text.tag])
-
-parser = argparse.ArgumentParser(description="Tag files based on their content")
-parser.add_argument('-f', '--file', dest='files', nargs='+')
-parser.add_argument('-t', '--tag', dest='tags', nargs='+', default='out')
+        print(file, text.tag)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Tag files based on their content")
+    parser.add_argument('-f', '--file', dest='files', nargs='+')
+    parser.add_argument('-t', '--tag', dest='tags', nargs='+')
+
     args = parser.parse_args(sys.argv[1:])
 
     main(args.tags, args.files)

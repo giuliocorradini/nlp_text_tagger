@@ -43,7 +43,7 @@ class Text:
     __preserveNumberPresence = True
     __stemmer = nltk.stem.LancasterStemmer()
 
-    def __init__(self, source: str, tag: list = None, lang: str = 'english'):
+    def __init__(self, source: str, tag: str = None, lang: str = 'english'):
         self.text = source
 
         # State variables initialization
