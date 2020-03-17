@@ -1,8 +1,7 @@
 from structures import Text, Tag
-import sys, os, fnmatch
+import sys, os
 import pickle
 import argparse
-from operator import itemgetter
 
 class Model:
 
@@ -14,13 +13,15 @@ class Model:
     def assignTags(self, text: Text):
         text.preprocessing()
         for tag in self.tags:
-            if tag.rate(text) >= threshold:
+
+            if tag.rate( set(text.tokens) ) >= self.threshold:
                 text.addTag(tag)
 
     def classify(self, text: Text):
         text.preprocessing()
-        rated = [(tag, tag.rate(text.getWords())) for tag in self.tags]
-        text.addTag(max(rated, key=itemgetter(1))[0])
+        words = set(text.tokens)
+
+        text.addTag( max(self.tags, key=lambda x: x.rate(words)) )
 
 
 def loadFromFile(filename: str) -> object:
@@ -44,11 +45,11 @@ def main(tags: list, files: list, classify = False):
         else:
             model.assignTags(text)
 
-    print(file, [t.name for t in text.tags])
+        print(file, [t.name for t in text.tags])
 
 parser = argparse.ArgumentParser(description="Tag files based on their content")
 parser.add_argument('-f', '--file', dest='files', nargs='+')
-parser.add_argument('-t', '--tag', dest='tags', nargs='+')
+parser.add_argument('-t', '--tag', dest='tags', nargs='+', default='out')
 parser.add_argument('-c', action='store_true', default=False, dest='classify')
 
 if __name__ == "__main__":

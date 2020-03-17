@@ -2,7 +2,7 @@ import string
 import re
 import nltk
 
-nltk.data.path.append('./nltk_data')    # Configure corpora and models path
+nltk.data.path.append('/Users/giuliocorradini/Desktop/TextClassification/nltk_data')    # Configure corpora and models path
 
 class Tag:
     '''
@@ -10,14 +10,14 @@ class Tag:
     Used to assign tags and store model data.
     '''
 
-    def __init__(self, tag_name: str, language: str = 'english', tag_words: set = set()):
+    def __init__(self, tag_name: str, language: str = 'english', tag_words: set = None):
         '''
         Constructs a bag of words ready to be compared against a tokenized text.
         :param comp_tag: Tag to compare against
         '''
         self.name = tag_name
         self.language = language
-        self.tag_words = tag_words
+        self.tag_words = tag_words if tag_words != None else set()
 
     def __str__(self):
         return self.name
@@ -43,7 +43,7 @@ class Text:
     __preserveNumberPresence = True
     __stemmer = nltk.stem.LancasterStemmer()
 
-    def __init__(self, source: str, lang: str = 'english'):
+    def __init__(self, source: str, tags: list = None, lang: str = 'english'):
         self.text = source
 
         # State variables initialization
@@ -58,7 +58,10 @@ class Text:
         if lang != 'english':
             self.__stemmer = nltk.stem.SnowballStemmer(lang)
 
-        self.tags = []
+        if tags == None:
+            self.tags = []
+        else:
+            self.tags = tags
 
     def __str__(self):
         return self.text
@@ -153,9 +156,6 @@ class Text:
         self.tokenize()
         self.removeStopWords()
         self.stem()
-
-    def getWords(self):
-        return set(self.tokens)
 
     def addTag(self, tag: Tag):
         self.tags.append(tag)
