@@ -25,7 +25,7 @@ class Trainer:
     def loadCorpus(self, files: list):
         '''
         Loads corpus texts as list of strings containing the text to analyze.
-        :param files: List of strings.
+        :param files: List of Text objects.
         '''
         self.corpus = files
         logging.debug("Loaded {} files in {} corpus.".format(len(files), self))
