@@ -2,7 +2,7 @@ import string
 import re
 import nltk
 
-nltk.data.path.append('/Users/giuliocorradini/Desktop/TextClassification/nltk_data')    # Configure corpora and models path
+nltk.data.path.append('nltk_data')    # Configure corpora and models path
 
 class Tag:
     '''
